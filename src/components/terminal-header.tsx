@@ -43,7 +43,12 @@ export function TerminalHeader() {
     }
   }, [])
 
-  // Track scroll-based active section only on home page
+  // Derive active section from route for non-home pages
+  const routeBasedSection = isHomePage
+    ? "home"
+    : location.pathname.replace("/", "")
+
+  // Track scroll-based active section on home page; use route-based for other pages
   useEffect(() => {
     if (!isHomePage) return
 
@@ -74,15 +79,8 @@ export function TerminalHeader() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [isHomePage])
 
-  // Set active based on route when not on home page
-  useEffect(() => {
-    if (!isHomePage) {
-      const routeName = location.pathname.replace("/", "")
-      setActiveSection(routeName)
-    } else {
-      setActiveSection("home")
-    }
-  }, [location.pathname, isHomePage])
+  // Use scroll-tracked state on home page, derived value otherwise
+  const effectiveActiveSection = isHomePage ? activeSection : routeBasedSection
 
   const handleNavClick = (href: string) => {
     setMobileMenuOpen(false)
@@ -119,7 +117,7 @@ export function TerminalHeader() {
     return item.href.replace("/", "")
   }
 
-  const logoAccent = accentColors[activeSection] || "text-terminal-green"
+  const logoAccent = accentColors[effectiveActiveSection] || "text-terminal-green"
 
   return (
     <header
@@ -140,7 +138,7 @@ export function TerminalHeader() {
         <nav className="hidden items-center gap-1 md:flex">
           {navItems.map((item) => {
             const key = getActiveKey(item)
-            const isActive = activeSection === key
+            const isActive = effectiveActiveSection === key
             const activeBgClass = accentBg[key] || ""
             const activePrefix = accentColors[key] || "text-terminal-green"
 
@@ -189,7 +187,7 @@ export function TerminalHeader() {
           <div className="flex flex-col gap-1">
             {navItems.map((item) => {
               const key = getActiveKey(item)
-              const isActive = activeSection === key
+              const isActive = effectiveActiveSection === key
               const activeBgClass = accentBg[key] || ""
               const activePrefix = accentColors[key] || "text-terminal-green"
 

@@ -27,7 +27,7 @@ export function HeroSection() {
       }
     }, 40)
     return () => clearInterval(interval)
-  }, [])
+  }, [fullText])
 
   // Staggered text reveal
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import gsap from "gsap"
-import { skillPixelLogos } from "@/components/pixel-logos"
+import { skillPixelLogos } from "@/components/skill-pixel-logo-map"
 
 interface SkillLogoCarouselProps {
   items: string[]
