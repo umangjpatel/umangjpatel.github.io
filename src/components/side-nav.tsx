@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { navItems } from "@/lib/data"
+import { sectionNavItems } from "@/lib/data"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -40,7 +40,7 @@ export function SideNav() {
   }, [])
 
   useEffect(() => {
-    const sections = navItems.map((item) => item.href.replace("#", ""))
+    const sections = sectionNavItems.map((item) => item.href.replace("#", ""))
 
     sections.forEach((sectionId) => {
       ScrollTrigger.create({
@@ -89,7 +89,7 @@ export function SideNav() {
           />
         </div>
 
-        {navItems.map((item) => {
+        {sectionNavItems.map((item) => {
           const sectionId = item.href.replace("#", "")
           const isActive = activeSection === sectionId
           const dotColor = sectionColors[sectionId] || "bg-terminal-green"

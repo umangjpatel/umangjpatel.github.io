@@ -126,11 +126,22 @@ export const skills = {
   ],
 }
 
-export const navItems = [
+// Section-based nav items (scroll anchors on the home page)
+export const sectionNavItems = [
   { label: "home", href: "#home" },
   { label: "experience", href: "#experience" },
-  { label: "projects", href: "#projects" },
   { label: "skills", href: "#skills" },
   { label: "education", href: "#education" },
   { label: "contact", href: "#contact" },
+]
+
+// Route-based nav items (separate pages)
+export const routeNavItems = [
+  { label: "goodies", href: "/goodies" },
+]
+
+// Combined for the header (order matters for display)
+export const navItems = [
+  ...sectionNavItems,
+  ...routeNavItems,
 ]

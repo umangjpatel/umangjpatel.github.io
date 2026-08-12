@@ -1,30 +1,37 @@
 import { useRef, useEffect, useState } from "react"
+import { useLocation, useNavigate, Link } from "react-router-dom"
 import gsap from "gsap"
-import { navItems } from "@/lib/data"
+import { navItems, sectionNavItems } from "@/lib/data"
 
 // Dracula-themed section colors
-const sectionAccentColors: Record<string, string> = {
-  "#home": "text-terminal-green",
-  "#experience": "text-terminal-orange",
-  "#projects": "text-terminal-cyan",
-  "#skills": "text-terminal-purple",
-  "#education": "text-terminal-pink",
-  "#contact": "text-terminal-green",
+const accentColors: Record<string, string> = {
+  home: "text-terminal-green",
+  experience: "text-terminal-orange",
+  projects: "text-terminal-cyan",
+  skills: "text-terminal-purple",
+  education: "text-terminal-pink",
+  contact: "text-terminal-green",
+  goodies: "text-terminal-cyan",
 }
 
-const sectionAccentBg: Record<string, string> = {
-  "#home": "bg-terminal-green/10 text-terminal-green",
-  "#experience": "bg-terminal-orange/10 text-terminal-orange",
-  "#projects": "bg-terminal-cyan/10 text-terminal-cyan",
-  "#skills": "bg-terminal-purple/10 text-terminal-purple",
-  "#education": "bg-terminal-pink/10 text-terminal-pink",
-  "#contact": "bg-terminal-green/10 text-terminal-green",
+const accentBg: Record<string, string> = {
+  home: "bg-terminal-green/10 text-terminal-green",
+  experience: "bg-terminal-orange/10 text-terminal-orange",
+  projects: "bg-terminal-cyan/10 text-terminal-cyan",
+  skills: "bg-terminal-purple/10 text-terminal-purple",
+  education: "bg-terminal-pink/10 text-terminal-pink",
+  contact: "bg-terminal-green/10 text-terminal-green",
+  goodies: "bg-terminal-cyan/10 text-terminal-cyan",
 }
 
 export function TerminalHeader() {
   const headerRef = useRef<HTMLElement>(null)
-  const [activeSection, setActiveSection] = useState("#home")
+  const [activeSection, setActiveSection] = useState("home")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const isHomePage = location.pathname === "/" || location.pathname === ""
 
   useEffect(() => {
     if (headerRef.current) {
@@ -36,16 +43,18 @@ export function TerminalHeader() {
     }
   }, [])
 
+  // Track scroll-based active section only on home page
   useEffect(() => {
-    const handleScroll = () => {
-      const sections = navItems.map((item) => item.href.replace("#", ""))
+    if (!isHomePage) return
 
-      // If near the bottom of the page, force-select the last section
+    const handleScroll = () => {
+      const sections = sectionNavItems.map((item) => item.href.replace("#", ""))
+
       const scrollTop = window.scrollY
       const docHeight =
         document.documentElement.scrollHeight - window.innerHeight
       if (docHeight > 0 && scrollTop / docHeight > 0.95) {
-        setActiveSection(`#${sections[sections.length - 1]}`)
+        setActiveSection(sections[sections.length - 1])
         return
       }
 
@@ -54,18 +63,63 @@ export function TerminalHeader() {
         if (el) {
           const rect = el.getBoundingClientRect()
           if (rect.top <= 120) {
-            setActiveSection(`#${sections[i]}`)
+            setActiveSection(sections[i])
             break
           }
         }
       }
     }
     window.addEventListener("scroll", handleScroll, { passive: true })
+    handleScroll()
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, [isHomePage])
 
-  const accentColor =
-    sectionAccentColors[activeSection] || "text-terminal-green"
+  // Set active based on route when not on home page
+  useEffect(() => {
+    if (!isHomePage) {
+      const routeName = location.pathname.replace("/", "")
+      setActiveSection(routeName)
+    } else {
+      setActiveSection("home")
+    }
+  }, [location.pathname, isHomePage])
+
+  const handleNavClick = (href: string) => {
+    setMobileMenuOpen(false)
+
+    // Route-based link (no #)
+    if (!href.startsWith("#")) {
+      navigate(href)
+      return
+    }
+
+    // Section-based link — scroll on home page, navigate then scroll
+    const sectionId = href.replace("#", "")
+    if (isHomePage) {
+      const el = document.getElementById(sectionId)
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" })
+      }
+    } else {
+      // Navigate to home, then scroll after render
+      navigate("/")
+      setTimeout(() => {
+        const el = document.getElementById(sectionId)
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" })
+        }
+      }, 100)
+    }
+  }
+
+  const getActiveKey = (item: { label: string; href: string }) => {
+    if (item.href.startsWith("#")) {
+      return item.href.replace("#", "")
+    }
+    return item.href.replace("/", "")
+  }
+
+  const logoAccent = accentColors[activeSection] || "text-terminal-green"
 
   return (
     <header
@@ -73,30 +127,30 @@ export function TerminalHeader() {
       className="fixed top-0 right-0 left-0 z-50 border-b border-[#44475a]/50 bg-[#282a36]/85 backdrop-blur-xl"
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-8">
-        <a
-          href="#home"
-          className={`group flex items-center gap-2 text-sm font-bold transition-all ${accentColor}`}
+        <Link
+          to="/"
+          className={`group flex items-center gap-2 text-sm font-bold transition-all ${logoAccent}`}
         >
           <span className="text-[#6272a4]">~/</span>
           <span>umangjpatel</span>
           <span className="animate-blink">_</span>
-        </a>
+        </Link>
 
         {/* Desktop Nav */}
         <nav className="hidden items-center gap-1 md:flex">
           {navItems.map((item) => {
-            const isActive = activeSection === item.href
-            const activeBg = sectionAccentBg[item.href] || ""
-            const activePrefix =
-              sectionAccentColors[item.href] || "text-terminal-green"
+            const key = getActiveKey(item)
+            const isActive = activeSection === key
+            const activeBgClass = accentBg[key] || ""
+            const activePrefix = accentColors[key] || "text-terminal-green"
 
             return (
-              <a
+              <button
                 key={item.href}
-                href={item.href}
+                onClick={() => handleNavClick(item.href)}
                 className={`rounded-md px-3 py-1.5 text-xs transition-all ${
                   isActive
-                    ? activeBg
+                    ? activeBgClass
                     : "text-[#6272a4] hover:bg-[#44475a]/50 hover:text-foreground"
                 }`}
               >
@@ -106,7 +160,7 @@ export function TerminalHeader() {
                   ./
                 </span>
                 {item.label}
-              </a>
+              </button>
             )
           })}
         </nav>
@@ -118,13 +172,13 @@ export function TerminalHeader() {
           aria-label="Toggle menu"
         >
           <span
-            className={`h-0.5 w-5 transition-all ${accentColor.replace("text-", "bg-")} ${mobileMenuOpen ? "translate-y-1.5 rotate-45" : ""}`}
+            className={`h-0.5 w-5 transition-all ${logoAccent.replace("text-", "bg-")} ${mobileMenuOpen ? "translate-y-1.5 rotate-45" : ""}`}
           />
           <span
-            className={`h-0.5 w-5 transition-all ${accentColor.replace("text-", "bg-")} ${mobileMenuOpen ? "opacity-0" : ""}`}
+            className={`h-0.5 w-5 transition-all ${logoAccent.replace("text-", "bg-")} ${mobileMenuOpen ? "opacity-0" : ""}`}
           />
           <span
-            className={`h-0.5 w-5 transition-all ${accentColor.replace("text-", "bg-")} ${mobileMenuOpen ? "-translate-y-1.5 -rotate-45" : ""}`}
+            className={`h-0.5 w-5 transition-all ${logoAccent.replace("text-", "bg-")} ${mobileMenuOpen ? "-translate-y-1.5 -rotate-45" : ""}`}
           />
         </button>
       </div>
@@ -134,19 +188,18 @@ export function TerminalHeader() {
         <nav className="border-t border-[#44475a]/50 bg-[#282a36]/95 px-4 py-3 backdrop-blur-xl md:hidden">
           <div className="flex flex-col gap-1">
             {navItems.map((item) => {
-              const isActive = activeSection === item.href
-              const activeBg = sectionAccentBg[item.href] || ""
-              const activePrefix =
-                sectionAccentColors[item.href] || "text-terminal-green"
+              const key = getActiveKey(item)
+              const isActive = activeSection === key
+              const activeBgClass = accentBg[key] || ""
+              const activePrefix = accentColors[key] || "text-terminal-green"
 
               return (
-                <a
+                <button
                   key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`rounded-md px-3 py-2 text-xs transition-all ${
+                  onClick={() => handleNavClick(item.href)}
+                  className={`rounded-md px-3 py-2 text-left text-xs transition-all ${
                     isActive
-                      ? activeBg
+                      ? activeBgClass
                       : "text-[#6272a4] hover:bg-[#44475a]/50 hover:text-foreground"
                   }`}
                 >
@@ -156,7 +209,7 @@ export function TerminalHeader() {
                     ./
                   </span>
                   {item.label}
-                </a>
+                </button>
               )
             })}
           </div>
