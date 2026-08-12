@@ -46,7 +46,7 @@ export function TerminalHeader() {
   // Derive active section from route for non-home pages
   const routeBasedSection = isHomePage
     ? "home"
-    : location.pathname.replace("/", "")
+    : location.pathname.split("/")[1] || ""
 
   // Track scroll-based active section on home page; use route-based for other pages
   useEffect(() => {
