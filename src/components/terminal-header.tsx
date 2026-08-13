@@ -97,16 +97,12 @@ export function TerminalHeader() {
       const el = document.getElementById(sectionId)
       if (el) {
         el.scrollIntoView({ behavior: "smooth" })
+        // Update URL hash for bookmarking/sharing
+        window.history.replaceState(null, "", href)
       }
     } else {
-      // Navigate to home, then scroll after render
-      navigate("/")
-      setTimeout(() => {
-        const el = document.getElementById(sectionId)
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth" })
-        }
-      }, 100)
+      // Navigate to home with hash — the HomePage hash effect handles scrolling
+      navigate(`/${href}`)
     }
   }
 
