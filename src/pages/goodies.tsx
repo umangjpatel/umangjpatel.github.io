@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import gsap from "gsap"
-import { Gamepad2 } from "lucide-react"
+import { Gamepad2, LayoutGrid } from "lucide-react"
 
 interface GoodieItem {
   title: string
@@ -19,6 +19,14 @@ const goodies: GoodieItem[] = [
     href: "/goodies/tictactoe",
     icon: <Gamepad2 className="h-6 w-6 text-terminal-cyan" />,
     tags: ["game", "ai", "react"],
+  },
+  {
+    title: "Sequence",
+    description:
+      "Classic card-based strategy board game. Two players compete to form sequences of 5 chips in a row on a 10×10 board.",
+    href: "/goodies/sequence",
+    icon: <LayoutGrid className="h-6 w-6 text-terminal-cyan" />,
+    tags: ["game", "strategy", "cards"],
   },
 ]
 

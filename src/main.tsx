@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider.tsx"
 import { HomePage } from "@/pages/home.tsx"
 import { GoodiesPage } from "@/pages/goodies.tsx"
 import { TicTacToePage } from "@/pages/tic-tac-toe.tsx"
+import { SequencePage } from "@/pages/sequence.tsx"
 import { NotFoundPage } from "@/pages/not-found.tsx"
 
 createRoot(document.getElementById("root")!).render(
@@ -19,6 +20,7 @@ createRoot(document.getElementById("root")!).render(
             <Route index element={<HomePage />} />
             <Route path="goodies" element={<GoodiesPage />} />
             <Route path="goodies/tictactoe" element={<TicTacToePage />} />
+            <Route path="goodies/sequence" element={<SequencePage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
