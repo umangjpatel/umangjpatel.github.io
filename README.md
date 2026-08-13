@@ -4,7 +4,7 @@ Personal portfolio website styled as a retro terminal/developer console using th
 
 ## Pages
 
-- **Home** (`/`) — Scrollable single-page with Hero, Experience, Skills, Education, and Contact sections. Includes a side dot-nav for desktop.
+- **Home** (`/`) — Scrollable single-page with Hero, Experience, Skills, Education, and Contact sections. Includes a side dot-nav for desktop. Supports hash-based deep links (e.g. `/#skills`, `/#education`) for direct navigation and bookmarking.
 - **Goodies** (`/goodies`) — Toy projects hub with a card grid linking to individual experiments.
   - **Tic-Tac-Toe** (`/goodies/tictactoe`) — Classic 3×3 game with two-player and AI modes (easy/hard via minimax).
 - **404** — Catch-all not-found page.
@@ -45,7 +45,7 @@ npm run dev
 ```
 src/
 ├── main.tsx              # Entry point, router setup, providers
-├── App.tsx               # Root layout (background + header + outlet + footer)
+├── App.tsx               # Root layout (background + header + outlet + footer + scroll-to-top on route change)
 ├── index.css             # Tailwind imports, Dracula theme variables, custom effects
 ├── components/
 │   ├── ui/               # shadcn/ui primitives (badge, button, card, separator, tooltip)
