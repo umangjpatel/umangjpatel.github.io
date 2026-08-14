@@ -7,6 +7,7 @@ Personal portfolio website styled as a retro terminal/developer console using th
 - **Home** (`/`) — Scrollable single-page with Hero, Experience, Skills, Education, and Contact sections. Includes a side dot-nav for desktop. Supports hash-based deep links (e.g. `/#skills`, `/#education`) for direct navigation and bookmarking.
 - **Goodies** (`/goodies`) — Toy projects hub with a card grid linking to individual experiments.
   - **Tic-Tac-Toe** (`/goodies/tictactoe`) — Classic 3×3 game with two-player and AI modes (easy/hard via minimax).
+  - **Sequence** (`/goodies/sequence`) — Two-player local hot-seat Sequence board game. Players take turns playing cards to place chips on a 10×10 board, aiming to form two sequences of 5 in a row. Features include two-eyed/one-eyed jack mechanics, dead card handling, and deck exhaustion draw detection.
 - **404** — Catch-all not-found page.
 
 ## Tech Stack
@@ -61,16 +62,19 @@ src/
 │   ├── pixel-background.tsx
 │   ├── pixel-logos.tsx
 │   ├── skill-logo-carousel.tsx
+│   ├── skill-pixel-logo-map.ts
 │   └── theme-provider.tsx
 ├── pages/
 │   ├── home.tsx
 │   ├── goodies.tsx
 │   ├── tic-tac-toe.tsx
+│   ├── sequence.tsx
 │   └── not-found.tsx
 ├── hooks/
 │   └── use-tilt.ts
 └── lib/
     ├── data.ts           # All static content
+    ├── sequence-engine.ts # Sequence game logic (pure functions)
     └── utils.ts          # cn() utility
 ```
 
