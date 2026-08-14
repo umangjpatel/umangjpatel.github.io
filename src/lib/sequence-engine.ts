@@ -710,11 +710,14 @@ export function discardOneEyedJackNoTargets(
 // ─── Sequence Detection & Win Condition ──────────────────────────────────────
 
 /**
- * Check for completed sequences of exactly 5 chips in a row for a given player.
+ * Check for completed sequences of 5+ chips in a row for a given player.
  *
  * Scans horizontal, vertical, and both diagonal directions.
  * Free-space corners (indices 0, 9, 90, 99) count as chips for BOTH players.
- * A line of 6+ does NOT count as a single sequence — only exactly 5 consecutive.
+ *
+ * A maximal contiguous run of 5+ chips in any direction counts as ONE sequence
+ * (using the first 5 cells of the run). A run of 6+ does not produce two
+ * overlapping sequences — it still counts as one.
  *
  * Returns an array of Sequence objects with `cells` and `player`.
  */
@@ -743,60 +746,57 @@ export function checkForSequences(board: BoardCell[], player: Player): Sequence[
     [1, -1],  // diagonal down-left
   ]
 
+  // For each direction, scan each possible line and find maximal contiguous runs
   for (const [dRow, dCol] of directions) {
-    // Determine valid starting points for each direction
-    const maxRow = dRow === 0 ? 9 : (10 - 5 * dRow)
-    const minCol = dCol === -1 ? 4 : 0
-    const maxCol = dCol === 1 ? 5 : (dCol === 0 ? 9 : 9)
+    // Determine the set of starting points for scanning lines in this direction.
+    // We need to iterate over every distinct line (not every starting cell for a 5-window).
+    // A "line" starts at a board edge and extends in the given direction.
 
-    for (let row = 0; row <= maxRow; row++) {
-      for (let col = minCol; col <= maxCol; col++) {
-        // Check if exactly 5 cells in this direction belong to the player
-        const cells: number[] = []
-        let valid = true
+    const startingPoints: [number, number][] = []
 
-        for (let step = 0; step < 5; step++) {
-          const r = row + step * dRow
-          const c = col + step * dCol
+    if (dRow === 0 && dCol === 1) {
+      // Horizontal: one line per row, starting at col=0
+      for (let r = 0; r < 10; r++) startingPoints.push([r, 0])
+    } else if (dRow === 1 && dCol === 0) {
+      // Vertical: one line per column, starting at row=0
+      for (let c = 0; c < 10; c++) startingPoints.push([0, c])
+    } else if (dRow === 1 && dCol === 1) {
+      // Diagonal down-right: start from top row and left column
+      for (let c = 0; c < 10; c++) startingPoints.push([0, c])
+      for (let r = 1; r < 10; r++) startingPoints.push([r, 0])
+    } else if (dRow === 1 && dCol === -1) {
+      // Diagonal down-left: start from top row and right column
+      for (let c = 0; c < 10; c++) startingPoints.push([0, c])
+      for (let r = 1; r < 10; r++) startingPoints.push([r, 9])
+    }
 
-          if (r < 0 || r > 9 || c < 0 || c > 9) {
-            valid = false
-            break
+    for (const [startRow, startCol] of startingPoints) {
+      // Walk along this line and find maximal contiguous runs of player cells
+      const runCells: number[] = []
+
+      let r = startRow
+      let c = startCol
+
+      while (r >= 0 && r <= 9 && c >= 0 && c <= 9) {
+        const idx = toIndex(r, c)
+
+        if (cellBelongsToPlayer(idx)) {
+          runCells.push(idx)
+        } else {
+          // End of a run — check if it was 5+
+          if (runCells.length >= 5) {
+            sequences.push({ cells: runCells.slice(0, 5), player })
           }
-
-          const idx = toIndex(r, c)
-          if (!cellBelongsToPlayer(idx)) {
-            valid = false
-            break
-          }
-          cells.push(idx)
+          runCells.length = 0
         }
 
-        if (!valid || cells.length !== 5) continue
+        r += dRow
+        c += dCol
+      }
 
-        // Ensure it's EXACTLY 5: check that the cells before and after (if they exist)
-        // do NOT belong to this player (otherwise it's part of a longer line, not exactly 5)
-        const beforeRow = row - dRow
-        const beforeCol = col - dCol
-        if (
-          beforeRow >= 0 && beforeRow <= 9 &&
-          beforeCol >= 0 && beforeCol <= 9 &&
-          cellBelongsToPlayer(toIndex(beforeRow, beforeCol))
-        ) {
-          continue
-        }
-
-        const afterRow = row + 5 * dRow
-        const afterCol = col + 5 * dCol
-        if (
-          afterRow >= 0 && afterRow <= 9 &&
-          afterCol >= 0 && afterCol <= 9 &&
-          cellBelongsToPlayer(toIndex(afterRow, afterCol))
-        ) {
-          continue
-        }
-
-        sequences.push({ cells, player })
+      // Check final run at end of line
+      if (runCells.length >= 5) {
+        sequences.push({ cells: runCells.slice(0, 5), player })
       }
     }
   }

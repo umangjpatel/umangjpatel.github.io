@@ -35,15 +35,12 @@ const initialUIState: UIState = {
 
 function StatusBar({
   gameState,
-  onNewGame,
 }: {
   gameState: GameState
-  onNewGame: () => void
 }) {
   const p1Sequences = gameState.sequences.filter((s) => s.player === 1).length
   const p2Sequences = gameState.sequences.filter((s) => s.player === 2).length
   const deckCount = gameState.deck.length
-  const isGameOver = gameState.phase === "won" || gameState.phase === "draw"
 
   return (
     <div className="mb-2 rounded-lg border border-[#44475a] bg-[#313342]/60 px-4 py-2">
@@ -104,16 +101,8 @@ function StatusBar({
           )}
         </div>
 
-        {/* Right section: New Game button (post-game) */}
-        {isGameOver && (
-          <button
-            onClick={onNewGame}
-            className="inline-flex items-center gap-1 text-terminal-green transition-colors hover:text-terminal-cyan"
-          >
-            <RotateCcw className="h-3 w-3" />
-            New Game
-          </button>
-        )}
+        {/* Right section: empty for alignment */}
+        <div />
       </div>
     </div>
   )
@@ -157,8 +146,7 @@ function BoardGrid({
         {gameState.board.map((cell, index) => {
           const isFreeSpace = FREE_SPACE_INDICES.includes(index)
           const isHighlighted = highlightedCells.includes(index)
-          const isWon = gameState.phase === "won"
-          const isPartOfSequence = cell.partOfSequence && isWon
+          const isPartOfSequence = cell.partOfSequence
           const layoutCard = BOARD_LAYOUT[index]
 
           let cellClasses =
@@ -175,15 +163,15 @@ function BoardGrid({
             cellClasses += "bg-[#282a36] border-[#44475a] "
           }
 
+          // Green border for completed sequence cells
+          if (isPartOfSequence) {
+            cellClasses += "!border-terminal-green "
+          }
+
           // Highlight valid cells
           if (isHighlighted) {
             cellClasses +=
               "ring-2 ring-terminal-green bg-terminal-green/10 "
-          }
-
-          // Winning glow
-          if (isPartOfSequence) {
-            cellClasses += "shadow-[0_0_8px] shadow-terminal-green "
           }
 
           return (
@@ -571,7 +559,7 @@ export function SequencePage() {
         </div>
 
         {/* Status bar */}
-        <StatusBar gameState={gameState} onNewGame={handleNewGame} />
+        <StatusBar gameState={gameState} />
 
         {/* Error message */}
         {uiState.errorMessage && (
